@@ -73,17 +73,12 @@ public:
 class Blackjack {
 private:
 	Shoe shoe = Shoe(6);
-	int wins, loses;
-public:
-	Blackjack() {
-		this->wins = 0;
-		this->loses = 0;
-	}
+	int wins = 0, loses = 0;
 
 	int handValue(vector<Card> hand) {
 		int sum = 0;
 
-		for (const auto &card : hand) {
+		for (const auto& card : hand) {
 			sum += card.cardValue();
 		}
 
@@ -92,12 +87,16 @@ public:
 
 	void displayHands(vector<Card> playersHand, vector<Card> dealersHand) {
 		cout << "Your Hand: " << endl;
-		for (const auto &card : playersHand) {
+		for (const auto& card : playersHand) {
 			card.print();
 		}
-
+		cout << "Your total: " << handValue(playersHand) << endl;
+		cout << endl;
 		cout << "Dealer's Hand:" << endl;
-		dealersHand[0].print();
+		for (const auto& card : dealersHand) {
+			card.print();
+		}
+		cout << "Dealer's total: " << handValue(dealersHand) << endl;
 	}
 
 	void playersTurn(vector<Card> playersHand) {
@@ -114,6 +113,67 @@ public:
 			}
 			else {
 				cout << "You stand with: " << handValue(playersHand) << endl;
+				break;
+			}
+		}
+	}
+
+	void dealersTurn(vector<Card> dealersHand) {
+		while (handValue(dealersHand) <= 16) {
+			dealersHand.push_back(shoe.deal());
+			cout << "Dealer hits: " << endl;
+			dealersHand.back().print();
+			cout << "Dealers new total: " << handValue(dealersHand) << endl;
+		}
+
+		cout << "Dealer stands with" << handValue(dealersHand) << endl;
+	}
+
+	void calculateOutcome(vector<Card> playersHand, vector<Card> dealersHand) {
+		int playersValue = handValue(playersHand);
+		int dealersValue = handValue(dealersHand);
+
+		if (playersValue > dealersValue || dealersValue > 21) {
+			cout << "Player Wins! The House has Lost!" << endl;
+			wins++;
+		}
+		else if (playersValue < dealersValue || playersValue > 21) {
+			cout << "Dealer Wins! The House always does!" << endl;
+			loses++;
+		}
+		else {
+			cout << "We have a draw! Push!" << endl;
+		}
+	}
+public:
+	Blackjack() {}
+
+	int playBlackjack() {
+		while (true) {
+			cout << "Time to play Blackjack!" << endl;
+			vector<Card> playersHand = { shoe.deal(), shoe.deal() };
+			vector<Card> dealersHand = { shoe.deal(), shoe.deal() };
+
+			displayHands(playersHand, dealersHand);
+
+			playersTurn(playersHand);
+
+			if (handValue(playersHand) > 21) {
+				cout << "You Busted! Dealer Wins!" << endl;
+				loses++;
+			}
+			else {
+				dealersTurn(dealersHand);
+				calculateOutcome(playersHand, dealersHand);
+			}
+
+			cout << "Your amount of Wins: " << wins << endl;
+			cout << "Your amount of Loses: " << loses << endl;
+
+			int choice;
+			cout << "Type 1 to Continue Playing or Type 2 to Stop PLaying: ";
+			cin >> choice;
+			if (choice == 2) {
 				break;
 			}
 		}
