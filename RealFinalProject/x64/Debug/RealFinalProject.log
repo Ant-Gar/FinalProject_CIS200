@@ -1,0 +1,9 @@
+﻿  RealFinalProject.cpp
+C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\Blackjack.h(49,64): warning C4244: 'argument': conversion from '_Rep' to 'unsigned int', possible loss of data
+C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\Blackjack.h(49,64): warning C4244:         with
+C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\Blackjack.h(49,64): warning C4244:         [
+C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\Blackjack.h(49,64): warning C4244:             _Rep=std::chrono::system_clock::rep
+C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\Blackjack.h(49,64): warning C4244:         ]
+  (compiling source file 'RealFinalProject.cpp')
+  
+  RealFinalProject.vcxproj -> C:\Users\agarc\Documents\GitHub\FinalProject_CIS200\RealFinalProject\x64\Debug\RealFinalProject.exe

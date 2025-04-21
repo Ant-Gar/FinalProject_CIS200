@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <algorithm>
 using namespace std;
 
 enum Suit { Hearts, Diamonds, Spades, Clubs };
@@ -17,7 +18,7 @@ public:
 		this->number = number;
 	}
 
-	int cardValue() {
+	int cardValue() const{
 		if (number >= Two && number <= Ten) {
 			return number;
 		}
@@ -28,13 +29,19 @@ public:
 			return 11;
 		}
 	}
+
+	void print() const{
+		string numbers[]{ "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+		string Suits[]{ "H", "D", "S", "C" };
+		cout << numbers[number - 2] << Suits[suit] << endl;
+	}
 };
 
 class Shoe {
 private:
 	vector<Card> deck;
 public:
-	Shoe() {
+	Shoe(int numDeck) {
 		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
 			for (int shoeSuit = Hearts; shoeSuit < Clubs; shoeSuit++) {
 				for (int shoeNumber = Two; shoeNumber < Ace; shoeNumber++) {
@@ -53,7 +60,62 @@ public:
 		if (deck.size() < 100) {
 			shuffleDeck();
 		}
-		Card card = deck.front();
+		Card card = deck.back();
+		deck.pop_back();
 		return card;
+	}
+
+	int remainingCards() {
+		return deck.size();
+	}
+};
+
+class Blackjack {
+private:
+	Shoe shoe = Shoe(6);
+	int wins, loses;
+public:
+	Blackjack() {
+		this->wins = 0;
+		this->loses = 0;
+	}
+
+	int handValue(vector<Card> hand) {
+		int sum = 0;
+
+		for (const auto &card : hand) {
+			sum += card.cardValue();
+		}
+
+		return sum;
+	}
+
+	void displayHands(vector<Card> playersHand, vector<Card> dealersHand) {
+		cout << "Your Hand: " << endl;
+		for (const auto &card : playersHand) {
+			card.print();
+		}
+
+		cout << "Dealer's Hand:" << endl;
+		dealersHand[0].print();
+	}
+
+	void playersTurn(vector<Card> playersHand) {
+		while (handValue(playersHand) <= 21) {
+			int choice;
+			cout << "Type 1 to Hit or Type 2 to Stand: ";
+			cin >> choice;
+
+			if (choice == 1) {
+				playersHand.push_back(shoe.deal());
+				cout << "You hit: " << endl;
+				playersHand.back().print();
+				cout << "Your new total: " << handValue(playersHand) << endl;
+			}
+			else {
+				cout << "You stand with: " << handValue(playersHand) << endl;
+				break;
+			}
+		}
 	}
 };
