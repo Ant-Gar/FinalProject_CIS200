@@ -10,17 +10,10 @@ using namespace std;
 
 class Card {
 public:
-	static int getCardValue(int card) {
-		if (card > 10) {
-			return 10;
-		}
-		else {
-			return card;
-		}
-	}
-
 	static int drawCard() {
-		return rand() % 11 + 1;
+		int card = rand() % 10 + 2;
+
+		return card;
 	}
 };
 
@@ -35,11 +28,11 @@ public:
 	void initializeShoe() {
 		cards.clear();
 		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
-			for (int rank = 1; rank <= 11; ++rank) {
+			for (int rank = 1; rank <= 11; rank++) {
 				for (int suitCount = 0; suitCount < 4; suitCount++) {
 					int value;
-					if (rank > 10) {
-						value = 10;
+					if (rank == 1) {
+						value = 11;
 					}
 					else {
 						value = rank;
@@ -115,7 +108,7 @@ public:
 			dealerHand = { Card::drawCard(), Card::drawCard() };
 
 			displayHands(playerHand, "Player");
-			cout << "Dealer's hand: |" << Card::getCardValue(dealerHand[0]) << "||?|";
+			cout << "Dealer's hand: |" << dealerHand[0] << "||?|";
 			cout << " = (Total: ?)" << endl;
 			cout << endl;
 
