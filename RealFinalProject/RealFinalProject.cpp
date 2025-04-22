@@ -12,4 +12,10 @@ int main(){
     cout << "Card: A      | Value: 1 or 11" << endl;
     cout << "-----------------------------" << endl;
     cout << endl;
+
+    Blackjack game;
+    game.playBlackjack();
+
+    return 0;
 }
+

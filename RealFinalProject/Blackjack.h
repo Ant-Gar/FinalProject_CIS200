@@ -20,7 +20,7 @@ public:
 	}
 
 	static int drawCard() {
-		return rand() % 13 + 1;
+		return rand() % 11 + 1;
 	}
 };
 
@@ -34,9 +34,9 @@ public:
 
 	void initializeShoe() {
 		cards.clear();
-		for (int deckOfCards = 0; deckOfCards < 6; ++deckOfCards) {
-			for (int rank = 1; rank <= 13; ++rank) {
-				for (int suitCount = 0; suitCount < 4; ++suitCount) {
+		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
+			for (int rank = 1; rank <= 11; ++rank) {
+				for (int suitCount = 0; suitCount < 4; suitCount++) {
 					int value;
 					if (rank > 10) {
 						value = 10;
@@ -58,11 +58,12 @@ public:
 
 	int drawCard() {
 		if (cards.size() < 100) {
-			cout << "[To much cards played, Reshuffle Time!]" << endl;
+			cout << "[Too little cards in deck, Reshuffle Time!]" << endl;
 			initializeShoe();
 		}
 		int card = cards.back();
 		cards.pop_back();
+
 		if (card == 1) {
 			return 11;
 		}
@@ -95,65 +96,86 @@ private:
 	void displayHands(vector<int> hand, string name) {
 		cout << name << "'s hand: ";
 		for (int card : hand) {
-			cout << card << " ";
+			cout << "|" << card << "|";
 		}
-		cout << "(Total: " << getHandValue(const_cast<vector<int>&>(hand)) << ")" << endl;
+		cout << " = (Total: " << getHandValue(const_cast<vector<int>&>(hand)) << ")" << endl;
+		cout << endl;
 	}
 
 public:
-
 	Blackjack() {
 		srand(time(0));
 	}
 
-	int playBlackjack() {
+	void playBlackjack() {
 		while (true) {
 			cout << "Time to play Blackjack!" << endl;
+			cout << endl;
 			playerHand = { Card::drawCard(), Card::drawCard() };
 			dealerHand = { Card::drawCard(), Card::drawCard() };
 
 			displayHands(playerHand, "Player");
-			cout << "Dealer's first card: " << Card::getCardValue(dealerHand[0]);
+			cout << "Dealer's hand: |" << Card::getCardValue(dealerHand[0]) << "||?|";
+			cout << " = (Total: ?)" << endl;
 			cout << endl;
 
-			int choice;
-			cout << "Type 1 to Continue Playing or Type 2 to Stop PLaying: ";
-			cin >> choice;
-			if (choice == 1) {
-				playerHand.push_back(Card::drawCard());
-				displayHands(playerHand, "Player");
-			}
-			else {
-				break;
-			}
+			char choice;
+			do {
+				cout << "Type H to Hit or S Stand: ";
+				cin >> choice;
+				cout << endl;
+
+				if (choice == 'H' || choice == 'h') {
+					playerHand.push_back(Card::drawCard());
+					displayHands(playerHand, "Player");
+				}
+				else {
+					break;
+				}
+			} while ((choice == 'H' || choice == 'h') && getHandValue(playerHand) < 21);
 
 			int playerTotal = getHandValue(playerHand);
 			if (playerTotal > 21) {
 				cout << "You Busted! Dealer Wins!" << endl;
-				loses++;
-			}
-			
-			cout << "Now it's the Dealer's turn!" << endl;
-			displayHands(dealerHand, "Dealer");
-
-			int dealerTotal = getHandValue(dealerHand);
-
-			while (getHandValue(dealerHand) < 17) {
-				dealerHand.push_back(Card::drawCard());
-				displayHands(dealerHand, "Dealer");
-			}
-
-			if (playerTotal > dealerTotal || dealerTotal > 21) {
-				cout << "Player Wins! The House has Lost!" << endl;
-				wins++;
-			}
-			else if (playerTotal < dealerTotal || playerTotal > 21) {
-				cout << "Dealer Wins! The House always does!" << endl;
+				cout << endl;
 				loses++;
 			}
 			else {
-				cout << "We have a draw! Push!" << endl;
+				cout << "Now it's the Dealer's turn!" << endl;
+				cout << endl;
+				displayHands(dealerHand, "Dealer");
+
+				
+
+				while (getHandValue(dealerHand) < 17) {
+					dealerHand.push_back(Card::drawCard());
+					displayHands(dealerHand, "Dealer");
+				}
+
+				int dealerTotal = getHandValue(dealerHand);
+				if (playerTotal > dealerTotal || dealerTotal > 21) {
+					cout << "Player Wins! The House has Lost!" << endl;
+					cout << endl;
+					wins++;
+				}
+				else if (playerTotal < dealerTotal || playerTotal > 21) {
+					cout << "Dealer Wins! The House always does!" << endl;
+					cout << endl;
+					loses++;
+				}
+				else {
+					cout << "We have a draw! Push!" << endl;
+					cout << endl;
+				}
 			}
+
+			cout << "Do you want to play again? (Y/N): ";
+			char playAgain;
+			cin >> playAgain;
+			if (playAgain != 'Y' && playAgain != 'y') {
+				break;
+			}
+			cout << "------------------------------------" << endl;
 		}
 	}
 };
