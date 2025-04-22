@@ -28,11 +28,11 @@ public:
 	void initializeShoe() {
 		cards.clear();
 		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
-			for (int rank = 1; rank <= 11; rank++) {
+			for (int rank = 1; rank <= 13; rank++) {
 				for (int suitCount = 0; suitCount < 4; suitCount++) {
 					int value;
-					if (rank == 1) {
-						value = 11;
+					if (rank > 10) {
+						value = 10;
 					}
 					else {
 						value = rank;
@@ -45,13 +45,16 @@ public:
 	}
 
 	void shuffleShoe() {
-		srand(time(0));
-		random_shuffle(cards.begin(), cards.end());
+		unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+		shuffle(cards.begin(), cards.end(), default_random_engine(seed));
 	}
 
 	int drawCard() {
 		if (cards.size() < 100) {
+			cout << "-------------------------------------------" << endl;
 			cout << "[Too little cards in deck, Reshuffle Time!]" << endl;
+			cout << "-------------------------------------------" << endl;
+			cout << endl;
 			initializeShoe();
 		}
 		int card = cards.back();
@@ -72,6 +75,7 @@ public:
 
 class Blackjack {
 private:
+	Shoe shoe;
 	vector<int> playerHand;
 	vector<int> dealerHand;
 	int wins = 0, loses = 0;
@@ -101,11 +105,16 @@ public:
 	}
 
 	void playBlackjack() {
+		/*
+		for (int i = 0; i < 200; i++) {
+			cout << shoe.drawCard() << endl;
+		}
+		*/
 		while (true) {
 			cout << "Time to play Blackjack!" << endl;
 			cout << endl;
-			playerHand = { Card::drawCard(), Card::drawCard() };
-			dealerHand = { Card::drawCard(), Card::drawCard() };
+			playerHand = { shoe.drawCard(), shoe.drawCard() };
+			dealerHand = { shoe.drawCard(), shoe.drawCard() };
 
 			displayHands(playerHand, "Player");
 			cout << "Dealer's hand: |" << dealerHand[0] << "||?|";
@@ -119,7 +128,7 @@ public:
 				cout << endl;
 
 				if (choice == 'H' || choice == 'h') {
-					playerHand.push_back(Card::drawCard());
+					playerHand.push_back(shoe.drawCard());
 					displayHands(playerHand, "Player");
 				}
 				else {
@@ -141,7 +150,7 @@ public:
 				
 
 				while (getHandValue(dealerHand) < 17) {
-					dealerHand.push_back(Card::drawCard());
+					dealerHand.push_back(shoe.drawCard());
 					displayHands(dealerHand, "Dealer");
 				}
 
