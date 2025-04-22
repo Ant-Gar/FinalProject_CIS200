@@ -3,178 +3,156 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
+#include <numeric>
 using namespace std;
 
-enum Suit { Hearts, Diamonds, Spades, Clubs };
-enum Number { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
-
 class Card {
-private:
-	Suit suit;
-	Number number;
 public:
-	Card(Suit suit, Number number) {
-		this->suit = suit;
-		this->number = number;
-	}
-
-	int cardValue() const{
-		if (number >= Two && number <= Ten) {
-			return number;
-		}
-		else if (number >= Jack && number <= King) {
+	static int getCardValue(int card) {
+		if (card > 10) {
 			return 10;
 		}
 		else {
-			return 11;
+			return card;
 		}
 	}
 
-	void print() const{
-		string numbers[]{ "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-		string Suits[]{ "H", "D", "S", "C" };
-		cout << numbers[number - 2] << Suits[suit] << endl;
+	static int drawCard() {
+		return rand() % 13 + 1;
 	}
 };
 
 class Shoe {
 private:
-	vector<Card> deck;
+	vector<int> cards;
 public:
-	Shoe(int numDeck) {
-		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
-			for (int shoeSuit = Hearts; shoeSuit < Clubs; shoeSuit++) {
-				for (int shoeNumber = Two; shoeNumber < Ace; shoeNumber++) {
-					deck.push_back(Card(static_cast<Suit>(shoeSuit), static_cast<Number>(shoeNumber)));
+	Shoe() {
+		initializeShoe();
+	}
+
+	void initializeShoe() {
+		cards.clear();
+		for (int deckOfCards = 0; deckOfCards < 6; ++deckOfCards) {
+			for (int rank = 1; rank <= 13; ++rank) {
+				for (int suitCount = 0; suitCount < 4; ++suitCount) {
+					int value;
+					if (rank > 10) {
+						value = 10;
+					}
+					else {
+						value = rank;
+					}
+					cards.push_back(value);
 				}
 			}
 		}
+		shuffleShoe();
 	}
 
-	void shuffleDeck() {
-		auto seed = chrono::system_clock::now().time_since_epoch().count();
-		std::shuffle(deck.begin(), deck.end(), default_random_engine(seed));
+	void shuffleShoe() {
+		srand(time(0));
+		random_shuffle(cards.begin(), cards.end());
 	}
 
-	Card deal() {
-		if (deck.size() < 100) {
-			shuffleDeck();
+	int drawCard() {
+		if (cards.size() < 100) {
+			cout << "[To much cards played, Reshuffle Time!]" << endl;
+			initializeShoe();
 		}
-		Card card = deck.back();
-		deck.pop_back();
-		return card;
+		int card = cards.back();
+		cards.pop_back();
+		if (card == 1) {
+			return 11;
+		}
+		else {
+			return card;
+		}
 	}
 
-	int remainingCards() {
-		return deck.size();
+	int remainingCards() const {
+		return cards.size();
 	}
 };
 
 class Blackjack {
 private:
-	Shoe shoe = Shoe(6);
+	vector<int> playerHand;
+	vector<int> dealerHand;
 	int wins = 0, loses = 0;
 
-	int handValue(vector<Card> hand) {
-		int sum = 0;
-
-		for (const auto& card : hand) {
-			sum += card.cardValue();
+	int getHandValue(vector<int>& hand) {
+		int total = accumulate(hand.begin(), hand.end(), 0);
+		int aceCount = count(hand.begin(), hand.end(), 11);
+		while (total > 21 && aceCount > 0) {
+			total -= 10;
+			aceCount--;
 		}
-
-		return sum;
+		return total;
 	}
 
-	void displayHands(vector<Card> playersHand, vector<Card> dealersHand) {
-		cout << "Your Hand: " << endl;
-		for (const auto& card : playersHand) {
-			card.print();
+	void displayHands(vector<int> hand, string name) {
+		cout << name << "'s hand: ";
+		for (int card : hand) {
+			cout << card << " ";
 		}
-		cout << "Your total: " << handValue(playersHand) << endl;
-		cout << endl;
-		cout << "Dealer's Hand:" << endl;
-		for (const auto& card : dealersHand) {
-			card.print();
-		}
-		cout << "Dealer's total: " << handValue(dealersHand) << endl;
+		cout << "(Total: " << getHandValue(const_cast<vector<int>&>(hand)) << ")" << endl;
 	}
 
-	void playersTurn(vector<Card> playersHand) {
-		while (handValue(playersHand) <= 21) {
-			int choice;
-			cout << "Type 1 to Hit or Type 2 to Stand: ";
-			cin >> choice;
-
-			if (choice == 1) {
-				playersHand.push_back(shoe.deal());
-				cout << "You hit: " << endl;
-				playersHand.back().print();
-				cout << "Your new total: " << handValue(playersHand) << endl;
-			}
-			else {
-				cout << "You stand with: " << handValue(playersHand) << endl;
-				break;
-			}
-		}
-	}
-
-	void dealersTurn(vector<Card> dealersHand) {
-		while (handValue(dealersHand) <= 16) {
-			dealersHand.push_back(shoe.deal());
-			cout << "Dealer hits: " << endl;
-			dealersHand.back().print();
-			cout << "Dealers new total: " << handValue(dealersHand) << endl;
-		}
-
-		cout << "Dealer stands with" << handValue(dealersHand) << endl;
-	}
-
-	void calculateOutcome(vector<Card> playersHand, vector<Card> dealersHand) {
-		int playersValue = handValue(playersHand);
-		int dealersValue = handValue(dealersHand);
-
-		if (playersValue > dealersValue || dealersValue > 21) {
-			cout << "Player Wins! The House has Lost!" << endl;
-			wins++;
-		}
-		else if (playersValue < dealersValue || playersValue > 21) {
-			cout << "Dealer Wins! The House always does!" << endl;
-			loses++;
-		}
-		else {
-			cout << "We have a draw! Push!" << endl;
-		}
-	}
 public:
-	Blackjack() {}
+
+	Blackjack() {
+		srand(time(0));
+	}
 
 	int playBlackjack() {
 		while (true) {
 			cout << "Time to play Blackjack!" << endl;
-			vector<Card> playersHand = { shoe.deal(), shoe.deal() };
-			vector<Card> dealersHand = { shoe.deal(), shoe.deal() };
+			playerHand = { Card::drawCard(), Card::drawCard() };
+			dealerHand = { Card::drawCard(), Card::drawCard() };
 
-			displayHands(playersHand, dealersHand);
-
-			playersTurn(playersHand);
-
-			if (handValue(playersHand) > 21) {
-				cout << "You Busted! Dealer Wins!" << endl;
-				loses++;
-			}
-			else {
-				dealersTurn(dealersHand);
-				calculateOutcome(playersHand, dealersHand);
-			}
-
-			cout << "Your amount of Wins: " << wins << endl;
-			cout << "Your amount of Loses: " << loses << endl;
+			displayHands(playerHand, "Player");
+			cout << "Dealer's first card: " << Card::getCardValue(dealerHand[0]);
+			cout << endl;
 
 			int choice;
 			cout << "Type 1 to Continue Playing or Type 2 to Stop PLaying: ";
 			cin >> choice;
-			if (choice == 2) {
+			if (choice == 1) {
+				playerHand.push_back(Card::drawCard());
+				displayHands(playerHand, "Player");
+			}
+			else {
 				break;
+			}
+
+			int playerTotal = getHandValue(playerHand);
+			if (playerTotal > 21) {
+				cout << "You Busted! Dealer Wins!" << endl;
+				loses++;
+			}
+			
+			cout << "Now it's the Dealer's turn!" << endl;
+			displayHands(dealerHand, "Dealer");
+
+			int dealerTotal = getHandValue(dealerHand);
+
+			while (getHandValue(dealerHand) < 17) {
+				dealerHand.push_back(Card::drawCard());
+				displayHands(dealerHand, "Dealer");
+			}
+
+			if (playerTotal > dealerTotal || dealerTotal > 21) {
+				cout << "Player Wins! The House has Lost!" << endl;
+				wins++;
+			}
+			else if (playerTotal < dealerTotal || playerTotal > 21) {
+				cout << "Dealer Wins! The House always does!" << endl;
+				loses++;
+			}
+			else {
+				cout << "We have a draw! Push!" << endl;
 			}
 		}
 	}
