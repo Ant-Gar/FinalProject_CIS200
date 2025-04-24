@@ -79,9 +79,9 @@ private:
 		cout << endl;
 	}
 
-	void resultsTable(int playersValue, char hitOrStand, int &wins, int &losses, int &draws) {
+	void resultsTable(int playersValue, int dealersFirstCard, char hitOrStand, int &wins, int &losses, int &draws) {
 		vector<int> simulatePlayerHand{ playersValue };
-		vector<int> dealersHand{ shoe.drawCard(), shoe.drawCard() };
+		vector<int> dealersHand{ dealersFirstCard, shoe.drawCard() };
 
 		if (hitOrStand == 'H' || hitOrStand == 'h') {
 			simulatePlayerHand.push_back(shoe.drawCard());
@@ -127,34 +127,42 @@ public:
 
 	void calculateResults() {
 		int simulations = 100000;
+		uniform_int_distribution<int> distribution(0, 1);
 
 		for (int handValue = 4; handValue <= 21; handValue++) {
-			int hitWins = 0, hitLosses = 0, hitDraws = 0,
-				standWins = 0, standLosses = 0, standDraws = 0;
+			for (int dealersFirstCard = 2; dealersFirstCard <= 11; dealersFirstCard++) {
+				int hitWins = 0, hitLosses = 0, hitDraws = 0,
+					standWins = 0, standLosses = 0, standDraws = 0;
 
-			for (int test = 0; test < simulations; test++) {
-				uniform_int_distribution<int> distribution(0, 1);
-				int choiceValue = distribution(generator);
-				char randomChoice;
-				if (choiceValue == 0) {
-					randomChoice = 'H';
+				for (int test = 0; test < simulations; test++) {
+					
+					int choiceValue = distribution(generator);
+					char randomChoice;
+					if (choiceValue == 0) {
+						randomChoice = 'H';
+					}
+					else {
+						randomChoice = 'S';
+					}
+
+					if (randomChoice == 'H') {
+						resultsTable(handValue, dealersFirstCard, 'H', hitWins, hitLosses, hitDraws);
+					}
+					else {
+						resultsTable(handValue, dealersFirstCard, 'S', standWins, standLosses, standDraws);
+					}
+				}
+				cout << "      " << handValue << "               |             ";
+				if (dealersFirstCard == 11) {
+					cout << "A";
 				}
 				else {
-					randomChoice = 'S';
+					cout << dealersFirstCard;
 				}
-
-				if (randomChoice == 'H') {
-					resultsTable(handValue, 'H', hitWins, hitLosses, hitDraws);
-				}
-				else {
-					resultsTable(handValue, 'S', standWins, standLosses, standDraws);
-				}
+				cout << "       |    " << hitWins << "/"
+					<< hitLosses << "/" << hitDraws << "    |     " << standWins
+					<< "/" << standLosses << "/" << standDraws << endl;
 			}
-
-			cout << "      " << handValue << "       |    " << hitWins << "/" 
-				<< hitLosses << "/" << hitDraws << "    |     " << standWins 
-				<< "/" << standLosses << "/" << standDraws << endl;
-				
 		}
 	}
 

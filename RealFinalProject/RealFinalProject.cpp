@@ -30,9 +30,9 @@ int main(){
 
     Blackjack simulation;
     cout << "Results Table Simulating 100,000 Hands:" << endl;
-    cout << "--------------------------------------------" << endl;
-    cout << "Starting Hand |  Hit(W/L/D)  |  Stand(W/L/D)" << endl;
-    cout << "--------------------------------------------" << endl;
+    cout << "-------------------------------------------------------------------------" << endl;
+    cout << "Players Starting Hand |  Dealers First Card | Hit(W/L/D)  |  Stand(W/L/D)" << endl;
+    cout << "-------------------------------------------------------------------------" << endl;
     simulation.calculateResults();
     
     return 0;
