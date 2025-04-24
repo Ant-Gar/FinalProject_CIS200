@@ -4,7 +4,6 @@
 #include <chrono>
 #include <algorithm>
 #include <ctime>
-#include <cstdlib>
 #include <numeric>
 using namespace std;
 
@@ -21,7 +20,10 @@ public:
 		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
 			for (int rank = 1; rank <= 13; rank++) {
 				int value;
-				if (rank > 10) {
+				if (rank == 1) {
+					value = 11;
+				}
+				else if (rank > 10) {
 					value = 10;
 				}
 				else {
@@ -42,23 +44,11 @@ public:
 
 	int drawCard() {
 		if (cards.size() < 100) {
-			cout << "-------------------------------------------" << endl;
-			cout << "[Too little cards in deck, Reshuffle Time!]" << endl;
-			cout << "-------------------------------------------" << endl;
-			cout << endl;
 			initializeShoe();
 		}
 		int card = cards.back();
 		cards.pop_back();
 		return card;
-		/*
-		if (card == 1) {
-			return 11;
-		}
-		else {
-			return card;
-		}
-		*/
 	}
 };
 
@@ -67,6 +57,7 @@ private:
 	Shoe shoe;
 	vector<int> playerHand;
 	vector<int> dealerHand;
+	default_random_engine generator;
 	int wins = 0, losses = 0, draws = 0;
 
 	int getHandValue(vector<int>& hand) {
@@ -89,7 +80,7 @@ private:
 	}
 
 	void resultsTable(int playersValue, char hitOrStand, int &wins, int &losses, int &draws) {
-		vector<int> simulatePlayerHand{ playersValue, shoe.drawCard()};
+		vector<int> simulatePlayerHand{ playersValue };
 		vector<int> dealersHand{ shoe.drawCard(), shoe.drawCard() };
 
 		if (hitOrStand == 'H' || hitOrStand == 'h') {
@@ -97,6 +88,7 @@ private:
 		}
 
 		int playersTotal = getHandValue(simulatePlayerHand);
+
 		if (playersTotal > 21) {
 			losses++;
 			return;
@@ -108,7 +100,15 @@ private:
 
 		int dealersTotal = getHandValue(dealersHand);
 
-		if (playersTotal > dealersTotal || dealersTotal > 21) {
+		if (playersTotal == 21) {
+			if (dealersTotal == 21) {
+				draws++;
+			}
+			else {
+				wins++;
+			}
+		}
+		else if (dealersTotal > 21 || playersTotal > dealersTotal) {
 			wins++;
 		}
 		else if (playersTotal < dealersTotal) {
@@ -122,32 +122,43 @@ private:
 public:
 	Blackjack() {
 		srand(time(0));
+		generator.seed(time(0));
 	}
 
 	void calculateResults() {
-		int simulations = 10;
+		int simulations = 100000;
 
 		for (int handValue = 4; handValue <= 21; handValue++) {
 			int hitWins = 0, hitLosses = 0, hitDraws = 0,
 				standWins = 0, standLosses = 0, standDraws = 0;
 
 			for (int test = 0; test < simulations; test++) {
-				resultsTable(handValue, 'H', hitWins, hitLosses, hitDraws);
-				resultsTable(handValue, 'S', standWins, standLosses, standDraws);
+				uniform_int_distribution<int> distribution(0, 1);
+				int choiceValue = distribution(generator);
+				char randomChoice;
+				if (choiceValue == 0) {
+					randomChoice = 'H';
+				}
+				else {
+					randomChoice = 'S';
+				}
+
+				if (randomChoice == 'H') {
+					resultsTable(handValue, 'H', hitWins, hitLosses, hitDraws);
+				}
+				else {
+					resultsTable(handValue, 'S', standWins, standLosses, standDraws);
+				}
 			}
 
-			cout << "Starting Hand: " << handValue << endl;
-			cout << "Hit Wins: " << hitWins << ", Losses: " << hitLosses << ", Draws: " << hitDraws << endl;
-			cout << "Stand Wins: " << standWins << ", Losses: " << standLosses << ", Draws: " << standDraws << endl;
+			cout << "      " << handValue << "       |    " << hitWins << "/" 
+				<< hitLosses << "/" << hitDraws << "    |     " << standWins 
+				<< "/" << standLosses << "/" << standDraws << endl;
+				
 		}
 	}
 
 	void playBlackjack() {
-		/*
-		for (int i = 0; i < 200; i++) {
-			cout << shoe.drawCard() << endl;
-		}
-		*/
 		while (true) {
 			cout << "Time to play Blackjack!" << endl;
 			cout << endl;
