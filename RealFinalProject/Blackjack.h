@@ -8,15 +8,6 @@
 #include <numeric>
 using namespace std;
 
-class Card {
-public:
-	static int drawCard() {
-		int card = rand() % 10 + 2;
-
-		return card;
-	}
-};
-
 class Shoe {
 private:
 	vector<int> cards;
@@ -29,14 +20,14 @@ public:
 		cards.clear();
 		for (int deckOfCards = 0; deckOfCards < 6; deckOfCards++) {
 			for (int rank = 1; rank <= 13; rank++) {
+				int value;
+				if (rank > 10) {
+					value = 10;
+				}
+				else {
+					value = rank;
+				}
 				for (int suitCount = 0; suitCount < 4; suitCount++) {
-					int value;
-					if (rank > 10) {
-						value = 10;
-					}
-					else {
-						value = rank;
-					}
 					cards.push_back(value);
 				}
 			}
@@ -59,13 +50,15 @@ public:
 		}
 		int card = cards.back();
 		cards.pop_back();
-
+		return card;
+		/*
 		if (card == 1) {
 			return 11;
 		}
 		else {
 			return card;
 		}
+		*/
 	}
 };
 
@@ -95,16 +88,16 @@ private:
 		cout << endl;
 	}
 
-	void resultsTable(int playersValue, char hitOrStand, int wins, int losses, int draws) {
-		vector<int> simulatePlayerHand{ playersValue };
+	void resultsTable(int playersValue, char hitOrStand, int &wins, int &losses, int &draws) {
+		vector<int> simulatePlayerHand{ playersValue, shoe.drawCard()};
 		vector<int> dealersHand{ shoe.drawCard(), shoe.drawCard() };
 
 		if (hitOrStand == 'H' || hitOrStand == 'h') {
 			simulatePlayerHand.push_back(shoe.drawCard());
 		}
 
-		int playersValue = getHandValue(simulatePlayerHand);
-		if (playersValue > 21) {
+		int playersTotal = getHandValue(simulatePlayerHand);
+		if (playersTotal > 21) {
 			losses++;
 			return;
 		}
@@ -115,19 +108,13 @@ private:
 
 		int dealersTotal = getHandValue(dealersHand);
 
-		if (playersValue > dealersTotal || dealersTotal > 21) {
-			cout << "Simulation: Player Wins! The House has Lost!" << endl;
-			cout << endl;
+		if (playersTotal > dealersTotal || dealersTotal > 21) {
 			wins++;
 		}
-		else if (playersValue < dealersTotal || playersValue > 21) {
-			cout << "Simulation: Dealer Wins! The House always does!" << endl;
-			cout << endl;
+		else if (playersTotal < dealersTotal) {
 			losses++;
 		}
 		else {
-			cout << "Simulation: We have a Draw! Push!" << endl;
-			cout << endl;
 			draws++;
 		}
 	}
@@ -138,16 +125,20 @@ public:
 	}
 
 	void calculateResults() {
-		for (int handValue = 1; handValue <= 21; handValue++) {
+		int simulations = 10;
+
+		for (int handValue = 4; handValue <= 21; handValue++) {
 			int hitWins = 0, hitLosses = 0, hitDraws = 0,
 				standWins = 0, standLosses = 0, standDraws = 0;
 
-			int simulations = 1;
-
-			for (int tests; tests < simulations; tests++) {
+			for (int test = 0; test < simulations; test++) {
 				resultsTable(handValue, 'H', hitWins, hitLosses, hitDraws);
 				resultsTable(handValue, 'S', standWins, standLosses, standDraws);
 			}
+
+			cout << "Starting Hand: " << handValue << endl;
+			cout << "Hit Wins: " << hitWins << ", Losses: " << hitLosses << ", Draws: " << hitDraws << endl;
+			cout << "Stand Wins: " << standWins << ", Losses: " << standLosses << ", Draws: " << standDraws << endl;
 		}
 	}
 

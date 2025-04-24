@@ -20,9 +20,12 @@ int main(){
     cout << "------------------------------------------------------------------------------------------" << endl;
     cout << endl;
 
-    Blackjack game;
+    //Blackjack game;
+    //game.playBlackjack();
 
-    game.playBlackjack();
+    Blackjack simulation;
+
+    simulation.calculateResults();
 
     return 0;
 }
