@@ -67,10 +67,6 @@ public:
 			return card;
 		}
 	}
-
-	int remainingCards() const {
-		return cards.size();
-	}
 };
 
 class Blackjack {
@@ -78,7 +74,7 @@ private:
 	Shoe shoe;
 	vector<int> playerHand;
 	vector<int> dealerHand;
-	int wins = 0, loses = 0;
+	int wins = 0, losses = 0, draws = 0;
 
 	int getHandValue(vector<int>& hand) {
 		int total = accumulate(hand.begin(), hand.end(), 0);
@@ -99,9 +95,60 @@ private:
 		cout << endl;
 	}
 
+	void resultsTable(int playersValue, char hitOrStand, int wins, int losses, int draws) {
+		vector<int> simulatePlayerHand{ playersValue };
+		vector<int> dealersHand{ shoe.drawCard(), shoe.drawCard() };
+
+		if (hitOrStand == 'H' || hitOrStand == 'h') {
+			simulatePlayerHand.push_back(shoe.drawCard());
+		}
+
+		int playersValue = getHandValue(simulatePlayerHand);
+		if (playersValue > 21) {
+			losses++;
+			return;
+		}
+
+		while (getHandValue(dealersHand) < 17) {
+			dealersHand.push_back(shoe.drawCard());
+		}
+
+		int dealersTotal = getHandValue(dealersHand);
+
+		if (playersValue > dealersTotal || dealersTotal > 21) {
+			cout << "Simulation: Player Wins! The House has Lost!" << endl;
+			cout << endl;
+			wins++;
+		}
+		else if (playersValue < dealersTotal || playersValue > 21) {
+			cout << "Simulation: Dealer Wins! The House always does!" << endl;
+			cout << endl;
+			losses++;
+		}
+		else {
+			cout << "Simulation: We have a Draw! Push!" << endl;
+			cout << endl;
+			draws++;
+		}
+	}
+
 public:
 	Blackjack() {
 		srand(time(0));
+	}
+
+	void calculateResults() {
+		for (int handValue = 1; handValue <= 21; handValue++) {
+			int hitWins = 0, hitLosses = 0, hitDraws = 0,
+				standWins = 0, standLosses = 0, standDraws = 0;
+
+			int simulations = 1;
+
+			for (int tests; tests < simulations; tests++) {
+				resultsTable(handValue, 'H', hitWins, hitLosses, hitDraws);
+				resultsTable(handValue, 'S', standWins, standLosses, standDraws);
+			}
+		}
 	}
 
 	void playBlackjack() {
@@ -140,7 +187,7 @@ public:
 			if (playerTotal > 21) {
 				cout << "You Busted! Dealer Wins!" << endl;
 				cout << endl;
-				loses++;
+				losses++;
 			}
 			else {
 				cout << "Now it's the Dealer's turn!" << endl;
@@ -163,13 +210,18 @@ public:
 				else if (playerTotal < dealerTotal || playerTotal > 21) {
 					cout << "Dealer Wins! The House always does!" << endl;
 					cout << endl;
-					loses++;
+					losses++;
 				}
 				else {
-					cout << "We have a draw! Push!" << endl;
+					cout << "We have a Draw! Push!" << endl;
 					cout << endl;
+					draws++;
 				}
 			}
+			cout << "Your Total Wins: " << wins << endl;
+			cout << "Your Total Losses: " << losses << endl;
+			cout << "Your Total draws: " << draws << endl;
+			cout << endl;
 
 			cout << "Do you want to play again? (Y/N): ";
 			char playAgain;
