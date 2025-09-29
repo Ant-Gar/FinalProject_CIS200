@@ -16,5 +16,5 @@ This project is a **C++ implementation of Blackjack**. It starts as a playable g
 - Collecting and analyzing results.  
 - Incremental commits (10+ over different days).  
 
-P.S. This work was a Final Project for CIS200 Class. Work was done by Zhalgas Tileumuratin and Anthony Garcia
+P.S. This work was a Final Project for CIS200 Class. Work was done by Anthony Garcia Franco and Zhalgas Tileumuratin 
 
